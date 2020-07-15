@@ -8,11 +8,26 @@ By default, CeWL sticks to just the site you have specified and will go to a dep
 
 CeWL also has an associated command line app, FAB (Files Already Bagged) which uses the same meta data extraction techniques to create author/creator lists from already downloaded.
 
+For anyone running CeWL with Ruby 2.7, you might get some warnings in the style:
+
+```
+.../ruby-2.7.0/gems/mime-types-3.2.2/lib/mime/types/logger.rb:30: warning: `_1' is reserved for numbered parameter; consider another name
+```
+This is due to a new feature introduced in 2.7 which conflices with one line of code in the logger script from the mime-types gem. There is an update for it in the [gem's repo](https://github.com/mime-types/ruby-mime-types/commit/c44673179d24e495e5fb93282a87d37f09925d25#diff-f0a644249326afd54e7a0b90c807f8a6) so hopefully that will be released soon. Till then, as far as I can tell, the warning does not affect CeWL in any way. If, for asthetics, you want to hide the warning, you can run the script as follows:
+
+```
+ruby -W0 ./cewl.rb
+```
+
 Homepage: <https://digi.ninja/projects/cewl.php>
 
 GitHub: <https://github.com/digininja/CeWL>
 
 ## Change Log
+
+### Version 5.4.9
+
+* Added Docker support.
 
 ### Version 5.4.8
 
@@ -204,6 +219,25 @@ Usage: cewl [OPTIONS] ... <url>
 
     <url>: The site to spider.
 ```
+
+### Running CeWL in a Docker container
+
+To quickly use CeWL on your machine with Docker, you have to build it :
+1. Build the container :
+    ```sh
+    docker build -t cewl .
+    ```
+2. Container usage without interacting with local files :
+    ```sh
+    docker run -it --rm cewl [OPTIONS] ... <url>
+    ```
+3. Container usage with local files as input or output :
+    ```sh
+    # you have to mount the current directory when calling the container 
+    docker run -it --rm -v "${PWD}:/host" cewl [OPTIONS] ... <url>
+    ```
+
+I am going to stress here, I am not going to be offering any support for this. The work was done by [@loris-intergalactique](https://github.com/loris-intergalactique) who has offered to field any questions on it and give support. I don't use or know Docker, so please, don't ask me for help.
 
 ## Licence
 
