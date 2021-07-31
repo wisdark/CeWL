@@ -1,7 +1,8 @@
 source 'https://rubygems.org'
-gem 'nokogiri'
-gem 'spider'
-gem 'mini_exiftool'
-gem 'zip'
 gem 'mime'
-gem 'mime-types'
+gem 'mime-types', ">=3.3.1"
+gem 'mini_exiftool'
+gem 'nokogiri'
+gem 'rexml'
+gem 'rubyzip'
+gem 'spider'
