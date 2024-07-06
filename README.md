@@ -1,6 +1,6 @@
 # CeWL - Custom Word List generator
 
-Copyright(c) 2022, Robin Wood <robin@digi.ninja>
+Copyright(c) 2024, Robin Wood <robin@digi.ninja>
 
 Based on a discussion on PaulDotCom (episode 129) about creating custom word lists spidering a targets website and collecting unique words I decided to write CeWL, the Custom Word List generator. CeWL is a ruby app which spiders a given URL to a specified depth, optionally following external links, and returns a list of words which can then be used for password crackers such as John the Ripper.
 
@@ -107,20 +107,18 @@ Usage: cewl [OPTIONS] ... <url>
 
 ### Running CeWL in a Docker container
 
-To quickly use CeWL on your machine with Docker, you have to build it :
-1. Build the container :
-    ```sh
-    docker build -t cewl .
-    ```
-2. Container usage without interacting with local files :
-    ```sh
-    docker run -it --rm cewl [OPTIONS] ... <url>
-    ```
-3. Container usage with local files as input or output :
-    ```sh
-    # you have to mount the current directory when calling the container 
-    docker run -it --rm -v "${PWD}:/host" cewl [OPTIONS] ... <url>
-    ```
+
+To quickly use CeWL with Docker, you can use the official `ghcr.io/digininja/cewl` image:
+
+```sh
+docker run -it --rm -v "${PWD}:/host" ghcr.io/digininja/cewl [OPTIONS] ... <url>
+```
+
+You can also build it locally:
+```sh
+docker build -t cewl .
+docker run -it --rm -v "${PWD}:/host" cewl [OPTIONS] ... <url>
+```
 
 I am going to stress here, I am not going to be offering any support for this. The work was done by [@loris-intergalactique](https://github.com/loris-intergalactique) who has offered to field any questions on it and give support. I don't use or know Docker, so please, don't ask me for help.
 

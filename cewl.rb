@@ -17,7 +17,7 @@
 # Licence:: CC-BY-SA 2.0 or GPL-3+
 #
 
-VERSION = "5.5.2 (Grouping)"
+VERSION = "6.2 (Fixes)"
 
 puts "CeWL #{VERSION} Robin Wood (robin@digi.ninja) (https://digi.ninja/)\n"
 
@@ -169,7 +169,7 @@ class MySpiderInstance<SpiderInstance
 
 				y = []
 				x.select do |a_url, parsed_url|
-                    if (parsed_url.scheme == "http" or parsed_url.scheme == "https") then
+                    if (parsed_url.scheme == "mailto" or parsed_url.scheme == "http" or parsed_url.scheme == "https") then
                       y << [a_url, parsed_url] if allowable_url?(a_url, parsed_url)
                     end
 				end
@@ -440,7 +440,7 @@ class Tree
 
 	# Push an item onto the tree
 	def push(value)
-		puts "Pushing #{value}" if @debug
+		puts "Adding #{value} to the tree" if @debug
 		key = value.keys.first
 		value = value.values_at(key).first
 
@@ -454,10 +454,21 @@ class Tree
 				@children << child
 			else
 				@children.each { |node|
-					if node.data.value == key && node.data.depth<@max_depth
-						child = Tree.new(key, value, node.data.depth + 1, @debug)
-						@children << child
-					end
+                    # Ignore the max depth for mailto links.
+                    # This is not a good way to do this, but it will work for now
+                    # and we all know dirty hacks stay around forever so don't
+                    # expect this to be fixed for a while.
+                    if value =~ /^mailto:/ then
+                      if node.data.value == key then
+                          child = Tree.new(key, value, node.data.depth + 1, @debug)
+                          @children << child
+                      end
+                    else
+                      if node.data.value == key && node.data.depth<@max_depth then
+                          child = Tree.new(key, value, node.data.depth + 1, @debug)
+                          @children << child
+                      end
+                    end
 				}
 			end
 		end
@@ -469,6 +480,7 @@ opts = GetoptLong.new(
 		['--keep', '-k', GetoptLong::NO_ARGUMENT],
 		['--depth', '-d', GetoptLong::REQUIRED_ARGUMENT],
 		['--min_word_length', "-m", GetoptLong::REQUIRED_ARGUMENT],
+		['--max_word_length', "-x", GetoptLong::REQUIRED_ARGUMENT],
 		['--no-words', "-n", GetoptLong::NO_ARGUMENT],
 		['--groups', "-g", GetoptLong::REQUIRED_ARGUMENT],
 		['--offsite', "-o", GetoptLong::NO_ARGUMENT],
@@ -506,6 +518,7 @@ def usage
 	-k, --keep: Keep the downloaded file.
 	-d <x>,--depth <x>: Depth to spider to, default 2.
 	-m, --min_word_length: Minimum word length, default 3.
+	-x, --max_word_length: Maximum word length, default unset.
 	-o, --offsite: Let the spider visit other sites.
 	--exclude: A file containing a list of paths to exclude
 	--allowed: A regex pattern that path must match to be followed
@@ -557,6 +570,7 @@ exclude_array = []
 allowed_pattern = nil
 depth = 2
 min_word_length = 3
+max_word_length = -1
 email = false
 meta = false
 wordlist = true
@@ -623,6 +637,9 @@ begin
 				email_outfile = arg
 			when "--email"
 				email = true
+			when '--max_word_length'
+				max_word_length = arg.to_i
+				usage if max_word_length < 1
 			when '--min_word_length'
 				min_word_length = arg.to_i
 				usage if min_word_length < 1
@@ -754,7 +771,7 @@ else
 	email_outfile_file = outfile_file
 end
 
-if meta_outfile && email
+if meta_outfile && meta
 	begin
 		meta_outfile_file = File.new(meta_outfile, "w")
 	rescue
@@ -1018,7 +1035,7 @@ catch :ctrl_c do
 							# Add to the array
 							group_words = []
 							words.split(" ").each do |word|
-								if word.length >= min_word_length
+								if word.length >= min_word_length and (max_word_length == -1 or word.length <= max_word_length)
 									word_hash[word] = 0 if !word_hash.has_key?(word)
 									word_hash[word] += 1
 								end

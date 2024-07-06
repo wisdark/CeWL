@@ -1,10 +1,11 @@
-FROM ruby:2.5-alpine
+FROM ruby:3-alpine
 
-ENV RUBYOPT "rubygems"
+ENV RUBYOPT "rrubygems"
 
-COPY Gemfile /usr/src/CeWl/
-WORKDIR /usr/src/CeWl
+COPY Gemfile /usr/src/CeWL/
+WORKDIR /usr/src/CeWL
 
+RUN apk add gcompat
 RUN set -ex \
     && apk add  --no-cache --virtual .build-deps build-base \
     && gem install bundler \
